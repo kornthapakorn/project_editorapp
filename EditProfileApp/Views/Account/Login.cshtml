@@ -1,0 +1,190 @@
+﻿@model EditProfileApp.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "เข้าสู่ระบบ";
+}
+
+<style>
+    :root {
+        --kmitl-blue: #1a2e4c;
+        --kmitl-orange: #e87722;
+        --input-bg: #f1f4f8;
+    }
+
+    body {
+        background-color: var(--kmitl-blue) !important;
+        font-family: 'Sarabun', sans-serif;
+    }
+
+    .login-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        width: 100%;
+        max-width: 400px;
+        margin: auto;
+        overflow: hidden;
+    }
+
+    .card-body-ce {
+        padding: 40px;
+    }
+
+    .header-section {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .logo-ce {
+        width: 120px;
+        margin-bottom: 15px;
+    }
+
+    .title-ce {
+        color: var(--kmitl-blue);
+        font-weight: 800;
+        font-size: 1.5rem;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+    }
+
+    .form-group-ce {
+        margin-bottom: 20px;
+    }
+
+    .label-ce {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .input-wrapper-ce {
+        display: flex;
+        align-items: center;
+        background-color: var(--input-bg);
+        border: 2px solid transparent;
+        border-radius: 12px;
+        padding: 0 15px;
+        transition: all 0.3s ease;
+    }
+
+        .input-wrapper-ce:focus-within {
+            border-color: var(--kmitl-orange);
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(232, 119, 34, 0.1);
+        }
+
+        .input-wrapper-ce i {
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+    .input-ce {
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 12px 10px;
+        width: 100%;
+        font-size: 1rem;
+        outline: none;
+        color: #333;
+    }
+
+    .btn-login-ce {
+        background-color: var(--kmitl-orange);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px;
+        width: 100%;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-login-ce:hover {
+            background-color: #cf661a;
+            transform: translateY(-2px);
+        }
+
+    .forgot-link-ce {
+        display: block;
+        text-align: right;
+        font-size: 0.85rem;
+        color: #666;
+        text-decoration: none;
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+
+        .forgot-link-ce:hover {
+            color: var(--kmitl-orange);
+        }
+
+    .divider-ce {
+        display: flex;
+        align-items: center;
+        margin: 25px 0;
+        color: #ccc;
+        font-size: 0.8rem;
+    }
+
+        .divider-ce::before, .divider-ce::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #eee;
+        }
+
+        .divider-ce span {
+            padding: 0 10px;
+        }
+
+    .footer-ce {
+        text-align: center;
+        font-size: 0.8rem;
+        color: #888;
+        line-height: 1.5;
+    }
+</style>
+
+<div class="d-flex align-items-center justify-content-center" style="min-height: 100vh;">
+    <div class="login-card">
+        <div class="card-body-ce">
+
+            <form asp-controller="Account" asp-action="Login" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3 text-center"></div>
+
+                <div class="form-group-ce">
+                    <label class="label-ce">Username</label>
+                    <div class="input-wrapper-ce">
+                        <i class="bi bi-person-fill"></i>
+                        <input asp-for="Username" class="input-ce" placeholder="" required autofocus />
+                    </div>
+                </div>
+                <div class="form-group-ce">
+                    <label class="label-ce">Password</label>
+                    <div class="input-group mb-1">
+                        <div class="input-wrapper-ce w-100">
+                            <i class="bi bi-lock-fill"></i>
+                            <input asp-for="Password" type="password" class="input-ce" placeholder="" required />
+                        </div>
+                    </div>
+                    <a asp-action="ForgotPassword" class="forgot-link-ce">ลืมรหัสผ่าน?</a>
+                </div>
+
+                <button type="submit" class="btn-login-ce">เข้าสู่ระบบ</button>
+
+                <div class="divider-ce"><span>หรือ</span></div>
+
+                <div class="footer-ce">
+                    หากพบปัญหาการใช้งาน กรุณาติดต่อ<br>
+                    <strong>อาจารย์อรรถศาสตร์ นาคเทวัญ</strong><br>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,179 @@
+﻿@model EditProfileApp.Models.UserProfile
+
+@{
+    ViewData["Title"] = "รายละเอียดโปรไฟล์";
+}
+
+<style>
+    :root {
+        --kmitl-blue: #1a2e4c;
+        --kmitl-orange: #e87722;
+    }
+
+    body {
+        background-color: #f0f2f5;
+    }
+
+    .details-container {
+        max-width: 900px;
+        margin-top: 40px;
+    }
+
+    .profile-card {
+        border: none;
+        border-radius: 25px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        background: white;
+        overflow: hidden;
+    }
+
+    .profile-header {
+        background: var(--kmitl-blue);
+        padding: 40px;
+        color: white;
+        text-align: center;
+        position: relative;
+    }
+
+        .profile-header h2 {
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+    .header-accent {
+        height: 5px;
+        background: var(--kmitl-orange);
+        width: 100%;
+    }
+
+    .profile-body {
+        padding: 40px;
+    }
+
+    .info-group {
+        margin-bottom: 30px;
+    }
+
+    .info-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        color: #888;
+        font-weight: 700;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+        .info-label i {
+            margin-right: 8px;
+            color: var(--kmitl-orange);
+        }
+
+    .info-value {
+        font-size: 1.15rem;
+        color: var(--kmitl-blue);
+        font-weight: 600;
+        padding-left: 25px;
+    }
+
+    .info-divider {
+        border-top: 1px solid #f0f0f0;
+        margin: 20px 0;
+    }
+
+    .action-section {
+        background: #fcfcfc;
+        padding: 25px 40px;
+        border-top: 1px solid #eee;
+    }
+
+    .btn-edit-profile {
+        background-color: var(--kmitl-orange);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 30px;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+
+        .btn-edit-profile:hover {
+            background-color: #cf661a;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .btn-back {
+        color: var(--kmitl-blue);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .btn-back:hover {
+            color: var(--kmitl-orange);
+        }
+</style>
+
+<div class="container details-container pb-5">
+    <div class="profile-card">
+        <div class="profile-header">
+            <h2 class="text-uppercase">Student Profile</h2>
+            <p class="mb-0 opacity-75">Computer Engineering @@ KMITL</p>
+        </div>
+        <div class="header-accent"></div>
+
+        <div class="profile-body">
+            <div class="row">
+                <div class="col-md-6 border-end">
+                    <div class="info-group">
+                        <div class="info-label"><i class="bi bi-person-badge"></i> Student ID</div>
+                        <div class="info-value">@Model.StudentId</div>
+                    </div>
+
+                    <div class="info-group">
+                        <div class="info-label"><i class="bi bi-building"></i> Department</div>
+                        <div class="info-value">@(Model.Department ?? "-")</div>
+                    </div>
+
+                    <div class="info-group">
+                        <div class="info-label"><i class="bi bi-person-fill"></i> Full Name</div>
+                        <div class="info-value">@Model.FirstName @Model.LastName (@Model.Nickname)</div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 ps-md-4">
+                    <div class="info-group">
+                        <div class="info-label"><i class="bi bi-envelope-at"></i> Email Address</div>
+                        <div class="info-value text-muted" style="font-size: 1rem;">@(Model.Email ?? "-")</div>
+                    </div>
+
+                    <div class="info-group">
+                        <div class="info-label"><i class="bi bi-telephone"></i> Mobile Phone</div>
+                        <div class="info-value">@(Model.Phone ?? "-")</div>
+                    </div>
+
+                    <div class="info-group">
+                        <div class="info-label text-danger"><i class="bi bi-exclamation-triangle"></i> Emergency Contact</div>
+                        <div class="info-value">@(Model.EmergencyMobile ?? "-")</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-divider"></div>
+
+            <div class="text-center">
+                <small class="text-muted">ข้อมูลอัปเดตล่าสุดเมื่อ: @(Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "ไม่มีการบันทึกเวลา")</small>
+            </div>
+        </div>
+
+        <div class="action-section d-flex justify-content-between align-items-center">
+            <a asp-action="Index" class="btn-back">
+                <i class="bi bi-arrow-left me-1"></i> กลับหน้ารวมรายชื่อ
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model.StudentId" class="btn btn-edit-profile shadow-sm">
+                <i class="bi bi-pencil-square me-2"></i> แก้ไขข้อมูลโปรไฟล์
+            </a>
+        </div>
+    </div>
+</div>

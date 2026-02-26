@@ -1,0 +1,262 @@
+﻿@model IEnumerable<EditProfileApp.Models.UserProfile>
+
+@{
+    ViewData["Title"] = "จัดการรายชื่อนักศึกษา";
+}
+
+<style>
+    :root {
+        --kmitl-blue: #1a2e4c;
+        --kmitl-orange: #e87722;
+    }
+
+    .page-title {
+        color: var(--kmitl-blue);
+        font-weight: 800;
+        margin-bottom: 25px;
+        border-left: 5px solid var(--kmitl-orange);
+        padding-left: 15px;
+    }
+
+    .import-card {
+        border: none;
+        border-radius: 15px;
+        background-color: #f8f9fa;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .btn-import {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+        .btn-import:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+    .table-ce {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        border: none;
+    }
+
+        .table-ce thead {
+            background-color: var(--kmitl-blue);
+            color: white;
+        }
+
+        .table-ce th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            padding: 15px;
+            border: none;
+        }
+
+        .table-ce td {
+            vertical-align: middle;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+    .student-id-cell {
+        font-weight: 700;
+        color: var(--kmitl-blue);
+    }
+
+    .btn-action {
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-right: 3px;
+    }
+
+    .search-box-container {
+        position: relative;
+        background: white;
+        border-radius: 50px;
+        border: 2px solid #eee;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+    }
+
+        .search-box-container:focus-within {
+            border-color: var(--kmitl-orange);
+            box-shadow: 0 5px 15px rgba(232, 119, 34, 0.15) !important;
+        }
+
+        .search-box-container .form-control {
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+
+    .btn-search-ce {
+        background-color: var(--kmitl-blue);
+        color: white;
+        border-radius: 0 50px 50px 0;
+        margin: 0;
+        height: 100%;
+        padding: 12px 30px;
+        transition: 0.3s;
+        border: none;
+    }
+
+        .btn-search-ce:hover {
+            background-color: var(--kmitl-orange);
+            color: white;
+        }
+
+    .suggestion-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 0 0 15px 15px;
+        z-index: 1000;
+        border: 2px solid var(--kmitl-orange);
+        border-top: none;
+    }
+</style>
+
+<div class="container-fluid pb-5">
+    <h2 class="page-title">STUDENT MANAGEMENT</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success shadow-sm">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger shadow-sm">@TempData["Error"]</div>
+    }
+
+    @* ส่วนอัปโหลด *@
+    <div class="card import-card mb-4">
+        <div class="card-body p-4">
+            <form asp-action="ImportExcel" method="post" enctype="multipart/form-data" class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <label class="fw-bold text-muted"><i class="bi bi-file-earmark-spreadsheet me-2"></i>นำเข้าข้อมูล (Excel):</label>
+                </div>
+                <div class="col-md-4">
+                    <input type="file" name="file" class="form-control form-control-sm" accept=".xlsx" required />
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-import btn-sm px-4">นำเข้าบัญชีผู้ใช้</button>
+                </div>
+                <div class="col-12">
+                    <small class="text-muted fst-italic">* รูปแบบไฟล์: คอลัมน์ A (รหัสนักศึกษา), คอลัมน์ B (รหัสผ่าน)</small>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @* ส่วนค้นหา *@
+    <div class="search-section mb-4">
+        <div class="row justify-content-center">
+            <div class="col-md-7">
+                <form asp-action="Index" method="get" id="searchForm" autocomplete="off">
+                    <div class="search-box-container shadow-sm">
+                        <span class="ps-4"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="searchInput" name="searchString"
+                               class="form-control py-3"
+                               placeholder="พิมพ์ชื่อหรือรหัสนักศึกษาเพื่อค้นหา..."
+                               value="@ViewData["CurrentFilter"]" />
+
+                        @if (!String.IsNullOrEmpty(ViewData["CurrentFilter"] as string))
+                        {
+                            <a asp-action="Index" class="btn btn-link text-decoration-none text-muted pe-3">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </a>
+                        }
+
+                        <button type="submit" class="btn btn-search-ce fw-bold">ค้นหา</button>
+                    </div>
+                    <div id="suggestion-box" class="suggestion-list shadow" style="display: none;"></div>
+                </form>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <p class="text-muted small mb-0">
+                <i class="bi bi-info-circle me-1"></i> พบข้อมูลทั้งหมด <strong>@Model.Count()</strong> รายการ
+            </p>
+        </div>
+    </div>
+
+    @* ส่วนตาราง *@
+    <div class="table-responsive">
+        <table class="table table-hover table-ce bg-white">
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Name - Surname</th>
+                    <th>Nickname</th>
+                    <th>Department</th>
+                    <th>Email</th>
+                    <th>Last Updated</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="student-id-cell">@item.StudentId</td>
+                        <td>@item.FirstName @item.LastName</td>
+                        <td><span class="badge bg-light text-dark border">@item.Nickname</span></td>
+                        <td>@item.Department</td>
+                        <td class="small text-muted">@item.Email</td>
+                        <td class="small">@(item.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                        <td class="text-center">
+                            <a asp-action="Edit" asp-route-id="@item.StudentId" class="btn btn-outline-primary btn-action btn-sm">แก้ไข</a>
+                            <a asp-action="Details" asp-route-id="@item.StudentId" class="btn btn-outline-info btn-action btn-sm text-dark">ดู</a>
+                            <button type="button" class="btn btn-outline-danger btn-action btn-sm"
+                                    onclick="confirmDelete('@item.StudentId', '@item.FirstName @item.LastName')">
+                                ลบ
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<form id="deleteForm" method="post" asp-action="Delete">
+    <input type="hidden" id="deleteId" name="id" />
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function confirmDelete(id, name) {
+            Swal.fire({
+                title: 'ยืนยันการลบข้อมูล?',
+                text: `คุณกำลังจะลบข้อมูลของ "${name}" (ID: ${id})`,
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'ใช่, ลบเลย',
+                cancelButtonText: 'ยกเลิก',
+                borderRadius: '15px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteId').value = id;
+                    document.getElementById('deleteForm').submit();
+                }
+            });
+        }
+
+    </script>
+}

@@ -1,0 +1,31 @@
+version: '3.4'
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${SQL_PASSWORD}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlvolume:/var/opt/mssql
+
+  editprofileapp:
+    image: ${DOCKER_REGISTRY-}editprofileapp
+    build:
+      context: .
+      dockerfile: EditProfileApp/Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Data Source=db,1433;Initial Catalog=RadiusDB;Persist Security Info=True;User ID=sa;Password=${SQL_PASSWORD};Trust Server Certificate=True
+      - EmailSettings__SenderEmail=${EMAIL_SENDER}
+      - EmailSettings__AppPassword=${EMAIL_APP_PASSWORD}
+    depends_on:
+      - db
+
+volumes:
+  sqlvolume:
