@@ -183,55 +183,70 @@ namespace EditProfileApp.Controllers
                     IXLWorksheet worksheet = workbook.Worksheet(1);
                     IXLRows rows = worksheet.RowsUsed();
 
-                    using (IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync())
+                    var strategy = _context.Database.CreateExecutionStrategy();
+
+                    try
                     {
-                        try
+                        await strategy.ExecuteAsync(async () =>
                         {
-                            foreach (IXLRow row in rows.Skip(1))
+                            using (IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync())
                             {
-                                string studentId = row.Cell(1).GetValue<string>().Trim();
-                                string password = row.Cell(2).GetValue<string>().Trim();
-
-                                if (string.IsNullOrEmpty(studentId) || string.IsNullOrEmpty(password)) continue;
-
-                                bool isProfileExists = _context.UserProfiles.Any(u => u.StudentId == studentId);
-                                bool isRadcheckExists = _context.Radchecks.Any(r => r.Username == studentId);
-
-                                if (isProfileExists || isRadcheckExists)
+                                try
                                 {
-                                    skipCount++;
-                                    continue;
+                                    successCount = 0;
+                                    skipCount = 0;
+
+                                    foreach (IXLRow row in rows.Skip(1))
+                                    {
+                                        string studentId = row.Cell(1).GetValue<string>().Trim();
+                                        string password = row.Cell(2).GetValue<string>().Trim();
+
+                                        if (string.IsNullOrEmpty(studentId) || string.IsNullOrEmpty(password)) continue;
+
+                                        bool isProfileExists = _context.UserProfiles.Any(u => u.StudentId == studentId);
+                                        bool isRadcheckExists = _context.Radchecks.Any(r => r.Username == studentId);
+
+                                        if (isProfileExists || isRadcheckExists)
+                                        {
+                                            skipCount++;
+                                            continue;
+                                        }
+
+                                        Radcheck radiusUser = new Radcheck
+                                        {
+                                            Username = studentId,
+                                            Attribute = "Cleartext-Password",
+                                            Op = ":=",
+                                            Value = password
+                                        };
+                                        _context.Radchecks.Add(radiusUser);
+
+                                        UserProfile emptyProfile = new UserProfile
+                                        {
+                                            StudentId = studentId,
+                                            UpdatedAt = thaiTime
+                                        };
+                                        _context.UserProfiles.Add(emptyProfile);
+
+                                        successCount++;
+                                    }
+
+                                    await _context.SaveChangesAsync();
+                                    await transaction.CommitAsync();
                                 }
-
-                                Radcheck radiusUser = new Radcheck
+                                catch (Exception)
                                 {
-                                    Username = studentId,
-                                    Attribute = "Cleartext-Password",
-                                    Op = ":=",
-                                    Value = password
-                                };
-                                _context.Radchecks.Add(radiusUser);
-
-                                UserProfile emptyProfile = new UserProfile
-                                {
-                                    StudentId = studentId,
-                                    UpdatedAt = thaiTime
-                                };
-                                _context.UserProfiles.Add(emptyProfile);
-
-                                successCount++;
+                                    await transaction.RollbackAsync();
+                                    throw;
+                                }
                             }
+                        });
 
-                            await _context.SaveChangesAsync();
-                            await transaction.CommitAsync();
-
-                            TempData["Success"] = $"นำเข้าสำเร็จ {successCount} รายการ และข้ามรายการที่ซ้ำ {skipCount} รายการ";
-                        }
-                        catch (Exception ex)
-                        {
-                            await transaction.RollbackAsync();
-                            TempData["Error"] = "เกิดข้อผิดพลาดในการนำเข้าข้อมูล: " + ex.Message;
-                        }
+                        TempData["Success"] = $"นำเข้าสำเร็จ {successCount} รายการ และข้ามรายการที่ซ้ำ {skipCount} รายการ";
+                    }
+                    catch (Exception ex)
+                    {
+                        TempData["Error"] = "เกิดข้อผิดพลาดในการนำเข้าข้อมูล (อาจเกิดจากการเชื่อมต่อขัดข้อง): " + ex.Message;
                     }
                 }
             }
