@@ -17,18 +17,26 @@
         {
             <nav class="navbar navbar-expand-sm navbar-dark border-bottom box-shadow mb-3" style="background-color: #1a2e4c;">
                 <div class="container-fluid">
-                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+
+                    <a class="navbar-brand fw-bold" href="#">EditProfileApp</a>
+
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMobileMenu" aria-controls="navbarMobileMenu" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between" id="navbarMobileMenu">
                         <ul class="navbar-nav flex-grow-1"></ul>
-                        <ul class="navbar-nav">
+
+                        <ul class="navbar-nav mt-3 mt-sm-0 gap-2">
                             <li class="nav-item d-flex align-items-center">
-                                <span class="nav-link text-white me-3 bg-white bg-opacity-10 rounded-pill px-3 py-1 small">
+                                <span class="nav-link text-white bg-white bg-opacity-10 rounded-pill px-3 py-1 small w-100 text-center">
                                     <i class="bi bi-person-vcard me-1"></i>
                                     ID: <span class="fw-bold text-warning">@User.Identity.Name</span>
                                 </span>
                             </li>
 
-                            <li class="nav-item d-flex align-items-center me-2">
-                                <button type="button" class="btn btn-warning btn-sm px-3 fw-bold shadow-sm"
+                            <li class="nav-item d-flex align-items-center">
+                                <button type="button" class="btn btn-warning btn-sm px-3 fw-bold shadow-sm w-100"
                                         data-bs-toggle="modal" data-bs-target="#changePasswordModal"
                                         style="letter-spacing: 0.5px;">
                                     <i class="bi bi-key-fill me-1"></i> เปลี่ยนรหัสผ่าน
@@ -36,7 +44,7 @@
                             </li>
 
                             <li class="nav-item">
-                                <a class="btn btn-danger btn-sm px-3 fw-bold shadow-sm text-white"
+                                <a class="btn btn-danger btn-sm px-3 fw-bold shadow-sm text-white w-100"
                                    href="javascript:void(0);"
                                    id="btnLogout"
                                    style="text-shadow: 0px 1px 2px rgba(0,0,0,0.2); letter-spacing: 0.5px;">
@@ -57,7 +65,7 @@
                         </div>
                         <div class="modal-body p-4">
                             <div id="step1">
-                                <p class="text-muted small text-center mb-4">ระบบจะส่งรหัส OTP 6 หลักไปยังอีเมลที่คุณลงทะเบียนไว้เพื่อความปลอดภัยครับ</p>
+                                <p class="text-muted small text-center mb-4">ระบบจะส่งรหัส OTP 6 หลักไปยังอีเมลสถาบันเพื่อยืนยันตัวตนครับ</p>
                                 <button id="btnRequestOtp" class="btn btn-primary w-100 fw-bold shadow-sm py-2">
                                     <i class="bi bi-envelope-paper me-1"></i> รับรหัส OTP ผ่านอีเมล
                                 </button>
