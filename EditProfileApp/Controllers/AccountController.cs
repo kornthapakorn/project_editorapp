@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using EditProfileApp.Models;
-using System.Security.Claims;
+﻿using EditProfileApp.Models;
+using EditProfileApp.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using EditProfileApp.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 
 namespace EditProfileApp.Controllers
@@ -145,6 +147,65 @@ namespace EditProfileApp.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> SendPasswordChangeOtp()
+        {
+            var username = User.Identity.Name;
+
+            string targetEmail = $"{username}@kmitl.ac.th";
+
+            Random rand = new Random();
+            string otp = rand.Next(100000, 999999).ToString();
+
+            HttpContext.Session.SetString("ChangePassOTP", otp);
+            HttpContext.Session.SetString("OtpExpiry", DateTime.UtcNow.AddMinutes(5).ToString());
+
+            try
+            {
+                string subject = "รหัส OTP สำหรับเปลี่ยนรหัสผ่าน";
+                string body = $"สวัสดีครับ,<br><br>รหัส OTP 6 หลักสำหรับการเปลี่ยนรหัสผ่านของคุณคือ: <b>{otp}</b><br><br>รหัสนี้จะหมดอายุภายใน 5 นาทีครับ";
+
+                await _emailService.SendEmailAsync(targetEmail, subject, body);
+
+                return Json(new { success = true, message = $"ระบบได้ส่ง OTP ไปที่อีเมล {targetEmail} แล้ว" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "เกิดข้อผิดพลาดในการส่งอีเมล: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> VerifyOtpAndChangePassword(string otp, string newPassword)
+        {
+            var username = User.Identity.Name;
+            var storedOtp = HttpContext.Session.GetString("ChangePassOTP");
+            var expiryStr = HttpContext.Session.GetString("OtpExpiry");
+
+            if (string.IsNullOrEmpty(storedOtp) || storedOtp != otp)
+                return Json(new { success = false, message = "รหัส OTP ไม่ถูกต้อง" });
+
+            if (DateTime.TryParse(expiryStr, out DateTime expiry) && DateTime.UtcNow > expiry)
+                return Json(new { success = false, message = "รหัส OTP หมดอายุแล้ว กรุณากดขอใหม่" });
+
+            var radcheck = await _context.Radchecks.FirstOrDefaultAsync(r => r.Username == username && r.Attribute == "Cleartext-Password");
+            if (radcheck != null)
+            {
+                radcheck.Value = newPassword;
+                _context.Update(radcheck);
+                await _context.SaveChangesAsync();
+
+                HttpContext.Session.Remove("ChangePassOTP");
+                HttpContext.Session.Remove("OtpExpiry");
+
+                return Json(new { success = true, message = "เปลี่ยนรหัสผ่านสำเร็จเรียบร้อยแล้ว!" });
+            }
+
+            return Json(new { success = false, message = "เกิดข้อผิดพลาด ไม่พบบัญชีในระบบ" });
         }
     }
 }
