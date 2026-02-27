@@ -17,7 +17,6 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// ตั้งค่าการเชื่อมต่อฐานข้อมูลพร้อมระบบ Retry
 builder.Services.AddDbContext<RadiusDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
     sqlServerOptionsAction: sqlOptions =>
@@ -38,14 +37,48 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 var app = builder.Build();
 
-// สร้างฐานข้อมูลและตารางอัตโนมัติ
+// สร้างฐานข้อมูลและตารางอัตโนมัติ พร้อมสร้าง Admin เริ่มต้น
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<RadiusDbContext>();
+
         context.Database.Migrate();
+
+        if (!context.UserProfiles.Any(u => u.StudentId == "AdminCE"))
+        {
+            TimeZoneInfo thaiZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            DateTime thaiTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, thaiZone);
+
+            context.UserProfiles.Add(new UserProfile
+            {
+                StudentId = "AdminCE",
+                FirstName = "System",
+                LastName = "Administrator",
+                Email = "admince@kmitl.ac.th",
+                Department = "Computer Engineering",
+                UpdatedAt = thaiTime
+            });
+
+            var adminSecretPassword = builder.Configuration["AdminDefaultPassword"];
+
+            if (string.IsNullOrEmpty(adminSecretPassword))
+            {
+                throw new Exception("FATAL ERROR: ระบบไม่พบรหัสผ่านสำหรับสร้าง AdminCE ");
+            }
+
+            context.Radchecks.Add(new Radcheck
+            {
+                Username = "AdminCE",
+                Attribute = "Cleartext-Password",
+                Op = ":=",
+                Value = adminSecretPassword
+            });
+
+            context.SaveChanges();
+        }
     }
     catch (Exception ex)
     {
