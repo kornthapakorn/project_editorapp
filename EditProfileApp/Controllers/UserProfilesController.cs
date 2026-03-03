@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Security.Cryptography; 
+using System.Text;                  
 
 namespace EditProfileApp.Controllers
 {
@@ -15,6 +17,20 @@ namespace EditProfileApp.Controllers
         public UserProfilesController(RadiusDbContext context)
         {
             _context = context;
+        }
+
+        private string HashPasswordSHA256(string rawPassword)
+        {
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawPassword));
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -75,7 +91,6 @@ namespace EditProfileApp.Controllers
         {
             if (id == null) return NotFound();
 
-            // โค้ดส่วนนี้จะทำหน้าที่ตรวจสอบสิทธิ์ให้เองครับ
             if (User.Identity.Name != id && !User.IsInRole("Admin"))
             {
                 return RedirectToAction("Edit", "UserProfiles", new { id = User.Identity.Name });
@@ -159,6 +174,37 @@ namespace EditProfileApp.Controllers
         }
 
         [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public IActionResult DownloadTemplate()
+        {
+            using (XLWorkbook workbook = new XLWorkbook())
+            {
+                IXLWorksheet worksheet = workbook.Worksheets.Add("Template");
+
+                worksheet.Cell(1, 1).Value = "StudentId";
+                worksheet.Cell(1, 2).Value = "Password";
+
+                var headerRow = worksheet.Range("A1:B1");
+                headerRow.Style.Font.Bold = true;
+                headerRow.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                worksheet.Cell(2, 1).Value = "65xxxxxx";
+                worksheet.Cell(2, 2).Value = "รหัสผ่านที่ต้องการตั้ง";
+                worksheet.Cell(2, 1).Style.Font.FontColor = XLColor.Gray;
+                worksheet.Cell(2, 2).Style.Font.FontColor = XLColor.Gray;
+
+                worksheet.Columns().AdjustToContents();
+
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+                    return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ImportTemplate.xlsx");
+                }
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ImportExcel(IFormFile file)
@@ -199,9 +245,9 @@ namespace EditProfileApp.Controllers
                                     foreach (IXLRow row in rows.Skip(1))
                                     {
                                         string studentId = row.Cell(1).GetValue<string>().Trim();
-                                        string password = row.Cell(2).GetValue<string>().Trim();
+                                        string rawPassword = row.Cell(2).GetValue<string>().Trim();
 
-                                        if (string.IsNullOrEmpty(studentId) || string.IsNullOrEmpty(password)) continue;
+                                        if (string.IsNullOrEmpty(studentId) || string.IsNullOrEmpty(rawPassword)) continue;
 
                                         bool isProfileExists = _context.UserProfiles.Any(u => u.StudentId == studentId);
                                         bool isRadcheckExists = _context.Radchecks.Any(r => r.Username == studentId);
@@ -212,12 +258,14 @@ namespace EditProfileApp.Controllers
                                             continue;
                                         }
 
+                                        string hashedPassword = HashPasswordSHA256(rawPassword);
+
                                         Radcheck radiusUser = new Radcheck
                                         {
                                             Username = studentId,
-                                            Attribute = "Cleartext-Password",
+                                            Attribute = "SHA256-Password",
                                             Op = ":=",
-                                            Value = password
+                                            Value = hashedPassword
                                         };
                                         _context.Radchecks.Add(radiusUser);
 

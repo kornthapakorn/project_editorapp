@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-
+using System.Security.Cryptography; 
+using System.Text;                 
 
 namespace EditProfileApp.Controllers
 {
@@ -20,6 +21,20 @@ namespace EditProfileApp.Controllers
         {
             _context = context;
             _emailService = emailService;
+        }
+
+        private string HashPasswordSHA256(string rawPassword)
+        {
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawPassword));
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
         }
 
         [HttpGet]
@@ -45,7 +60,9 @@ namespace EditProfileApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                Radcheck user = _context.Radchecks.FirstOrDefault(u => u.Username == model.Username && u.Value == model.Password);
+                string hashedPassword = HashPasswordSHA256(model.Password);
+
+                Radcheck user = _context.Radchecks.FirstOrDefault(u => u.Username == model.Username && u.Value == hashedPassword);
 
                 if (user != null)
                 {
@@ -130,7 +147,8 @@ namespace EditProfileApp.Controllers
             Radcheck user = _context.Radchecks.FirstOrDefault(u => u.Username == sessionStudentId);
             if (user != null)
             {
-                user.Value = model.NewPassword;
+                user.Value = HashPasswordSHA256(model.NewPassword);
+                user.Attribute = "SHA256-Password";
                 await _context.SaveChangesAsync();
 
                 HttpContext.Session.Remove("OTP");
@@ -192,10 +210,12 @@ namespace EditProfileApp.Controllers
             if (DateTime.TryParse(expiryStr, out DateTime expiry) && DateTime.UtcNow > expiry)
                 return Json(new { success = false, message = "รหัส OTP หมดอายุแล้ว กรุณากดขอใหม่" });
 
-            var radcheck = await _context.Radchecks.FirstOrDefaultAsync(r => r.Username == username && r.Attribute == "Cleartext-Password");
+            var radcheck = await _context.Radchecks.FirstOrDefaultAsync(r => r.Username == username);
             if (radcheck != null)
             {
-                radcheck.Value = newPassword;
+                radcheck.Value = HashPasswordSHA256(newPassword);
+                radcheck.Attribute = "SHA256-Password";
+
                 _context.Update(radcheck);
                 await _context.SaveChangesAsync();
 

@@ -69,12 +69,54 @@
         color: var(--kmitl-blue);
     }
 
+    /* 🎨 ส่วนที่ปรับปรุงใหม่: สไตล์ปุ่ม Action ให้ดูทันสมัย */
     .btn-action {
-        border-radius: 6px;
+        border-radius: 8px; /* ปรับให้โค้งมนขึ้นนิดหน่อย ดูละมุนขึ้น */
         font-size: 0.8rem;
-        font-weight: 600;
-        margin-right: 3px;
+        font-weight: 700; /* เพิ่มความหนาให้ตัวหนังสืออ่านง่าย */
+        margin-right: 4px;
+        padding: 6px 14px;
+        transition: all 0.2s ease-in-out;
+        border: none;
     }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+    /* สีปุ่มแก้ไข (ฟ้า/น้ำเงิน) */
+    .btn-edit {
+        background-color: #e0f2fe;
+        color: #0284c7;
+    }
+
+        .btn-edit:hover {
+            background-color: #bae6fd;
+            color: #0369a1;
+        }
+
+    /* สีปุ่มดูรายละเอียด (เทา/ดำ) */
+    .btn-view {
+        background-color: #f3f4f6;
+        color: #4b5563;
+    }
+
+        .btn-view:hover {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+
+    /* สีปุ่มลบ (แดง/ชมพู) */
+    .btn-delete {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+        .btn-delete:hover {
+            background-color: #fecaca;
+            color: #b91c1c;
+        }
 
     .search-box-container {
         position: relative;
@@ -151,6 +193,9 @@
                 </div>
                 <div class="col-auto">
                     <button type="submit" class="btn btn-import btn-sm px-4">นำเข้าบัญชีผู้ใช้</button>
+                    <a asp-action="DownloadTemplate" class="btn btn-outline-secondary btn-sm ms-2">
+                        <i class="bi bi-download"></i> โหลด Template
+                    </a>
                 </div>
                 <div class="col-12">
                     <small class="text-muted fst-italic">* รูปแบบไฟล์: คอลัมน์ A (รหัสนักศึกษา), คอลัมน์ B (รหัสผ่าน)</small>
@@ -208,6 +253,11 @@
             <tbody>
                 @foreach (var item in Model)
                 {
+                    if (item.StudentId.ToUpper() == "ADMINCE")
+                    {
+                        continue;
+                    }
+
                     <tr>
                         <td class="student-id-cell">@item.StudentId</td>
                         <td>@item.FirstName @item.LastName</td>
@@ -216,9 +266,9 @@
                         <td class="small text-muted">@item.Email</td>
                         <td class="small">@(item.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
                         <td class="text-center">
-                            <a asp-action="Edit" asp-route-id="@item.StudentId" class="btn btn-outline-primary btn-action btn-sm">แก้ไข</a>
-                            <a asp-action="Details" asp-route-id="@item.StudentId" class="btn btn-outline-info btn-action btn-sm text-dark">ดู</a>
-                            <button type="button" class="btn btn-outline-danger btn-action btn-sm"
+                            <a asp-action="Edit" asp-route-id="@item.StudentId" class="btn-action btn-edit text-decoration-none">แก้ไข</a>
+                            <a asp-action="Details" asp-route-id="@item.StudentId" class="btn-action btn-view text-decoration-none">ดู</a>
+                            <button type="button" class="btn-action btn-delete"
                                     onclick="confirmDelete('@item.StudentId', '@item.FirstName @item.LastName')">
                                 ลบ
                             </button>
@@ -245,8 +295,8 @@
                 text: `คุณกำลังจะลบข้อมูลของ "${name}" (ID: ${id})`,
                 icon: 'error',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
                 confirmButtonText: 'ใช่, ลบเลย',
                 cancelButtonText: 'ยกเลิก',
                 borderRadius: '15px'
@@ -257,6 +307,5 @@
                 }
             });
         }
-
     </script>
 }

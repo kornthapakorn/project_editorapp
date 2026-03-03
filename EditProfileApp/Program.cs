@@ -2,6 +2,8 @@ using EditProfileApp.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using EditProfileApp.Services;
+using System.Security.Cryptography; 
+using System.Text;                  
 
 System.Environment.SetEnvironmentVariable("TZ", "Asia/Bangkok");
 
@@ -37,7 +39,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 var app = builder.Build();
 
-// สร้างฐานข้อมูลและตารางอัตโนมัติ พร้อมสร้าง Admin เริ่มต้น
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -69,12 +70,14 @@ using (var scope = app.Services.CreateScope())
                 throw new Exception("FATAL ERROR: ระบบไม่พบรหัสผ่านสำหรับสร้าง AdminCE ");
             }
 
+            string hashedAdminPassword = HashPasswordSHA256(adminSecretPassword);
+
             context.Radchecks.Add(new Radcheck
             {
                 Username = "AdminCE",
-                Attribute = "Cleartext-Password",
+                Attribute = "SHA256-Password",
                 Op = ":=",
-                Value = adminSecretPassword
+                Value = hashedAdminPassword
             });
 
             context.SaveChanges();
@@ -105,3 +108,17 @@ app.MapControllerRoute(
     pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();
+
+static string HashPasswordSHA256(string rawPassword)
+{
+    using (SHA256 sha256Hash = SHA256.Create())
+    {
+        byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(rawPassword));
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < bytes.Length; i++)
+        {
+            builder.Append(bytes[i].ToString("x2"));
+        }
+        return builder.ToString();
+    }
+}

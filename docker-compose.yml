@@ -24,8 +24,15 @@ services:
       - ConnectionStrings__DefaultConnection=Data Source=db,1433;Initial Catalog=RadiusDB;Persist Security Info=True;User ID=sa;Password=${SQL_PASSWORD};Trust Server Certificate=True
       - EmailSettings__SenderEmail=${EMAIL_SENDER}
       - EmailSettings__AppPassword=${EMAIL_APP_PASSWORD}
+      - AdminDefaultPassword=${ADMIN_DEFAULT_PASSWORD}
     depends_on:
       - db
-
+  adminer:
+    image: adminer:latest
+    restart: always
+    ports:
+      - "8082:8080"
+    depends_on:
+      - db
 volumes:
   sqlvolume:
