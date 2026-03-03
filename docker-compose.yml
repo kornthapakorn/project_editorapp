@@ -1,5 +1,3 @@
-version: '3.4'
-
 services:
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -25,6 +23,7 @@ services:
       - EmailSettings__SenderEmail=${EMAIL_SENDER}
       - EmailSettings__AppPassword=${EMAIL_APP_PASSWORD}
       - AdminDefaultPassword=${ADMIN_DEFAULT_PASSWORD}
+      - APPDATA=/tmp
     depends_on:
       - db
   adminer:
