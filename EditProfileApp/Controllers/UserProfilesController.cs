@@ -75,10 +75,16 @@ namespace EditProfileApp.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("StudentId,FirstName,LastName,Nickname,Email,Phone,EmergencyMobile,Department,UpdatedAt")] UserProfile userProfile)
+        public async Task<IActionResult> Create([Bind("StudentId,FirstName,LastName,Nickname,Email,Phone,EmergencyMobile,UpdatedAt")] UserProfile userProfile)
         {
+            userProfile.Department = "วิศวกรรมคอมพิวเตอร์";
+            ModelState.Remove("Department");
+
             if (ModelState.IsValid)
             {
+                TimeZoneInfo thaiZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                userProfile.UpdatedAt = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, thaiZone);
+
                 _context.Add(userProfile);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -104,7 +110,7 @@ namespace EditProfileApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("StudentId,Department,Email,EmergencyMobile,FirstName,LastName,Nickname,Phone")] UserProfile userProfile)
+        public async Task<IActionResult> Edit(string id, [Bind("StudentId,Email,EmergencyMobile,FirstName,LastName,Nickname,Phone")] UserProfile userProfile)
         {
             TimeZoneInfo thaiZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             DateTime thaiTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, thaiZone);
@@ -115,6 +121,8 @@ namespace EditProfileApp.Controllers
             {
                 return RedirectToAction("Edit", "UserProfiles", new { id = User.Identity.Name });
             }
+            userProfile.Department = "วิศวกรรมคอมพิวเตอร์";
+            ModelState.Remove("Department");
 
             if (ModelState.IsValid)
             {
@@ -272,6 +280,7 @@ namespace EditProfileApp.Controllers
                                         UserProfile emptyProfile = new UserProfile
                                         {
                                             StudentId = studentId,
+                                            Department = "วิศวกรรมคอมพิวเตอร์",
                                             UpdatedAt = thaiTime
                                         };
                                         _context.UserProfiles.Add(emptyProfile);

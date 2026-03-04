@@ -12,33 +12,29 @@
     }
 
     body {
-        background-color: #f4f7f9; /* พื้นหลังเทาอ่อนเพื่อให้การ์ดสีขาวเด่นขึ้น */
+        background-color: #f4f7f9;
     }
 
-    /* ตกแต่งการ์ดแก้ไขข้อมูล */
     .edit-card {
         border: none;
         border-radius: 20px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         background: white;
-        margin-top: 30px; /* เพิ่มระยะห่างด้านบนอีกนิด */
+        margin-top: 30px;
         overflow: hidden;
     }
 
     .edit-card-header {
         background-color: var(--kmitl-blue);
         color: white;
-        padding: 35px 25px; /* เพิ่ม Padding ให้ดูโปร่งขึ้นเมื่อไม่มีไอคอน */
+        padding: 35px 25px;
         text-align: center;
     }
-
-    /* ลบ CSS ของ .profile-icon-circle ออกไปแล้วครับ */
 
     .edit-card-body {
         padding: 40px;
     }
 
-    /* จัดการบล็อกอินพุตให้เหมือนหน้า Login */
     .form-label {
         font-weight: 700;
         color: var(--kmitl-blue);
@@ -79,7 +75,6 @@
         color: #333;
     }
 
-    /* ช่องรหัสนักศึกษา (ReadOnly) */
     .readonly-wrapper {
         background-color: #e9ecef;
         cursor: not-allowed;
@@ -91,7 +86,6 @@
         cursor: not-allowed;
     }
 
-    /* ปุ่มกด */
     .btn-save-ce {
         background-color: var(--kmitl-orange);
         color: white;
@@ -134,7 +128,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="card edit-card">
-                @* ส่วนหัวการ์ด (ลบไอคอนวงกลมออกแล้ว) *@
+
                 <div class="edit-card-header">
                     <h3 class="mb-2 fw-bold">แก้ไขข้อมูลส่วนตัว</h3>
                     <p class="mb-0 opacity-75">กรุณาตรวจสอบและอัปเดตข้อมูลให้เป็นปัจจุบัน</p>
@@ -149,7 +143,7 @@
                         </div>
 
                         <div class="row">
-                            @* รหัสนักศึกษา (ห้ามแก้) *@
+
                             <div class="col-md-6">
                                 <label class="form-label">รหัสนักศึกษา</label>
                                 <div class="input-wrapper-ce readonly-wrapper">
@@ -157,12 +151,12 @@
                                     <input asp-for="StudentId" class="input-ce readonly-input" readonly />
                                 </div>
                             </div>
-                            @* ภาควิชา *@
+
                             <div class="col-md-6">
                                 <label class="form-label">ภาควิชา/สาขา</label>
-                                <div class="input-wrapper-ce">
+                                <div class="input-wrapper-ce readonly-wrapper">
                                     <i class="bi bi-building"></i>
-                                    <input asp-for="Department" class="input-ce" placeholder="เช่น วิศวกรรมคอมพิวเตอร์" />
+                                    <input asp-for="Department" class="input-ce readonly-input" value="วิศวกรรมคอมพิวเตอร์" readonly />
                                 </div>
                             </div>
                         </div>
@@ -199,7 +193,7 @@
                                 <label class="form-label">อีเมลสำรอง (ถ้ามี)</label>
                                 <div class="input-wrapper-ce">
                                     <i class="bi bi-envelope"></i>
-                                    <input asp-for="Email" class="input-ce" placeholder="example@@gmail.com" />
+                                    <input asp-for="Email" class="input-ce" placeholder="example@gmail.com" />
                                 </div>
                             </div>
                             <div class="col-md-6">

@@ -1,68 +1,244 @@
 ﻿@model EditProfileApp.Models.UserProfile
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "เพิ่มข้อมูลนักศึกษาใหม่";
 }
 
-<h1>Create</h1>
+<style>
+    :root {
+        --kmitl-blue: #1a2e4c;
+        --kmitl-orange: #e87722;
+        --input-focus: rgba(232, 119, 34, 0.15);
+    }
 
-<h4>UserProfile</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="StudentId" class="control-label"></label>
-                <input asp-for="StudentId" class="form-control" />
-                <span asp-validation-for="StudentId" class="text-danger"></span>
+    body {
+        background-color: #f4f7f9;
+    }
+
+    .edit-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        background: white;
+        margin-top: 30px;
+        overflow: hidden;
+    }
+
+    .edit-card-header {
+        background-color: var(--kmitl-blue);
+        color: white;
+        padding: 35px 25px;
+        text-align: center;
+    }
+
+    .edit-card-body {
+        padding: 40px;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: var(--kmitl-blue);
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .input-wrapper-ce {
+        display: flex;
+        align-items: center;
+        background-color: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 0 15px;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+
+        .input-wrapper-ce:focus-within {
+            border-color: var(--kmitl-orange);
+            background-color: white;
+            box-shadow: 0 0 0 4px var(--input-focus);
+        }
+
+        .input-wrapper-ce i {
+            color: #adb5bd;
+            font-size: 1.1rem;
+        }
+
+    .input-ce {
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 12px 10px;
+        width: 100%;
+        font-size: 1rem;
+        outline: none;
+        color: #333;
+    }
+
+    .readonly-wrapper {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
+
+    .readonly-input {
+        color: #6c757d;
+        font-weight: 700;
+        cursor: not-allowed;
+    }
+
+    .btn-save-ce {
+        background-color: #198754;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 15px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-save-ce:hover {
+            background-color: #157347;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(25, 135, 84, 0.3);
+        }
+
+    .btn-back-ce {
+        color: var(--kmitl-blue);
+        text-decoration: none;
+        font-weight: 600;
+        transition: 0.2s;
+    }
+
+        .btn-back-ce:hover {
+            color: var(--kmitl-orange);
+        }
+
+    .section-title {
+        font-size: 1rem;
+        color: var(--kmitl-orange);
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 25px;
+        font-weight: 800;
+    }
+</style>
+
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card edit-card">
+
+                <div class="edit-card-header">
+                    <h3 class="mb-2 fw-bold">เพิ่มข้อมูลนักศึกษาใหม่</h3>
+                    <p class="mb-0 opacity-75">กรอกข้อมูลพื้นฐานเพื่อสร้างโปรไฟล์ใหม่ในระบบ</p>
+                </div>
+
+                <div class="card-body edit-card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-4 text-center"></div>
+
+                        <div class="section-title text-uppercase">
+                            <i class="bi bi-person-plus-fill me-2"></i>ข้อมูลพื้นฐาน
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-6">
+                                <label class="form-label">รหัสนักศึกษา</label>
+                                <div class="input-wrapper-ce">
+                                    <i class="bi bi-card-text"></i>
+                                    <input asp-for="StudentId" class="input-ce" placeholder="ระบุนักศึกษา 8 หลัก" />
+                                </div>
+                                <span asp-validation-for="StudentId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">ภาควิชา/สาขา</label>
+                                <div class="input-wrapper-ce readonly-wrapper">
+                                    <i class="bi bi-building"></i>
+                                    <input asp-for="Department" class="input-ce readonly-input" value="วิศวกรรมคอมพิวเตอร์" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-5">
+                                <label class="form-label">ชื่อจริง</label>
+                                <div class="input-wrapper-ce">
+                                    <i class="bi bi-person"></i>
+                                    <input asp-for="FirstName" class="input-ce" placeholder="ไม่ต้องมีคำนำหน้า" />
+                                </div>
+                                <span asp-validation-for="FirstName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label">นามสกุล</label>
+                                <div class="input-wrapper-ce">
+                                    <i class="bi bi-person"></i>
+                                    <input asp-for="LastName" class="input-ce" />
+                                </div>
+                                <span asp-validation-for="LastName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">ชื่อเล่น</label>
+                                <div class="input-wrapper-ce">
+                                    <input asp-for="Nickname" class="input-ce text-center px-0" placeholder="ชื่อเล่น" />
+                                </div>
+                                <span asp-validation-for="Nickname" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="section-title text-uppercase mt-4">
+                            <i class="bi bi-telephone me-2"></i>ข้อมูลการติดต่อ
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">อีเมลสำรอง (ถ้ามี)</label>
+                                <div class="input-wrapper-ce">
+                                    <i class="bi bi-envelope"></i>
+                                    <input asp-for="Email" class="input-ce" placeholder="example@gmail.com" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">เบอร์โทรศัพท์มือถือ</label>
+                                <div class="input-wrapper-ce">
+                                    <i class="bi bi-phone"></i>
+                                    <input asp-for="Phone" class="input-ce" placeholder="08xxxxxxxx" />
+                                </div>
+                                <span asp-validation-for="Phone" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label class="form-label text-danger">เบอร์โทรศัพท์ติดต่อฉุกเฉิน</label>
+                                <div class="input-wrapper-ce border-danger border-opacity-25">
+                                    <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                                    <input asp-for="EmergencyMobile" class="input-ce" placeholder="ระบุเบอร์โทรผู้ปกครองหรือคนใกล้ชิด" />
+                                </div>
+                                <span asp-validation-for="EmergencyMobile" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-save-ce">
+                                <i class="bi bi-plus-circle-fill me-2"></i> สร้างโปรไฟล์นักศึกษา
+                            </button>
+                            <div class="text-center mt-3">
+                                <a asp-action="Index" class="btn-back-ce"><i class="bi bi-arrow-left me-1"></i> กลับสู่หน้ารวมรายชื่อ</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="FirstName" class="control-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LastName" class="control-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Nickname" class="control-label"></label>
-                <input asp-for="Nickname" class="form-control" />
-                <span asp-validation-for="Nickname" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Phone" class="control-label"></label>
-                <input asp-for="Phone" class="form-control" />
-                <span asp-validation-for="Phone" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EmergencyMobile" class="control-label"></label>
-                <input asp-for="EmergencyMobile" class="form-control" />
-                <span asp-validation-for="EmergencyMobile" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Department" class="control-label"></label>
-                <input asp-for="Department" class="form-control" />
-                <span asp-validation-for="Department" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
