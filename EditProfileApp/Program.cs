@@ -46,6 +46,8 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<RadiusDbContext>();
 
+        System.Threading.Thread.Sleep(10000);
+
         context.Database.Migrate();
 
         if (!context.UserProfiles.Any(u => u.StudentId == "AdminCE"))
